@@ -1,0 +1,59 @@
+{
+  "note": "Each variant replaces only the Utilize guard/subtraction block of accepted candidate11 and is built with the native platform-tools v1.37 recipe. v12 reproduces hosted candidate12/13 bytes exactly. v4, v6 and v7 canonicalize to the same bytes as v12. Only v2 (separate zero-use rejection followed by the unchanged upstream total/remaining guard and checked subtraction) reproduces the captured Utilize body. Variants v8-v10 were generated but their builds were stopped once v2 matched; no result is claimed for them.",
+  "variants": [
+    {
+      "variant": "v12",
+      "guard_source": "    if number_of_uses == 0 || number_of_uses > metadata_uses.total {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = metadata_uses\n        .remaining\n        .checked_sub(number_of_uses)\n        .ok_or(MetadataError::NotEnoughUses)?;\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "4f039033a3cde9d47aa8ee0f68c13c2c4d55a9d6ee0ab50df9d4ef93a4a02edf",
+      "differing_padded_positions_vs_capture": 196601,
+      "utilize_window_differing": 1585,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    },
+    {
+      "variant": "v2",
+      "guard_source": "    if number_of_uses == 0 {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    if number_of_uses > metadata_uses.total || number_of_uses > metadata_uses.remaining {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = metadata_uses\n        .remaining\n        .checked_sub(number_of_uses)\n        .ok_or(MetadataError::NotEnoughUses)?;\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "bab6d877aa6c3de6e3a9a5507cccd618570fcc49f3d197dce706279aae12a1b7",
+      "differing_padded_positions_vs_capture": 30,
+      "utilize_window_differing": 0,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    },
+    {
+      "variant": "v3",
+      "guard_source": "    if number_of_uses > metadata_uses.total || number_of_uses > metadata_uses.remaining {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    if number_of_uses == 0 {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = metadata_uses\n        .remaining\n        .checked_sub(number_of_uses)\n        .ok_or(MetadataError::NotEnoughUses)?;\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "416cf1d131c4431a51d484acc7ecc1695d9a5d0e680d0475c875c5b1fdf9c406",
+      "differing_padded_positions_vs_capture": 157,
+      "utilize_window_differing": 127,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    },
+    {
+      "variant": "v4",
+      "guard_source": "    if number_of_uses == 0 {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    if number_of_uses > metadata_uses.total {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = metadata_uses\n        .remaining\n        .checked_sub(number_of_uses)\n        .ok_or(MetadataError::NotEnoughUses)?;\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "4f039033a3cde9d47aa8ee0f68c13c2c4d55a9d6ee0ab50df9d4ef93a4a02edf",
+      "differing_padded_positions_vs_capture": 196601,
+      "utilize_window_differing": 1585,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    },
+    {
+      "variant": "v6",
+      "guard_source": "    if number_of_uses == 0 || number_of_uses > metadata_uses.total {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = match metadata_uses.remaining.checked_sub(number_of_uses) {\n        Some(remaining_uses) => remaining_uses,\n        None => return Err(MetadataError::NotEnoughUses.into()),\n    };\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "4f039033a3cde9d47aa8ee0f68c13c2c4d55a9d6ee0ab50df9d4ef93a4a02edf",
+      "differing_padded_positions_vs_capture": 196601,
+      "utilize_window_differing": 1585,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    },
+    {
+      "variant": "v7",
+      "guard_source": "    if number_of_uses == 0 || number_of_uses > metadata_uses.total {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    if metadata_uses.remaining < number_of_uses {\n        return Err(MetadataError::NotEnoughUses.into());\n    }\n    let remaining_uses = metadata_uses.remaining - number_of_uses;\n",
+      "raw_bytes": 707448,
+      "raw_sha256": "4f039033a3cde9d47aa8ee0f68c13c2c4d55a9d6ee0ab50df9d4ef93a4a02edf",
+      "differing_padded_positions_vs_capture": 196601,
+      "utilize_window_differing": 1585,
+      "layout": "candidate11 layout (before coordinate corrections)"
+    }
+  ]
+}

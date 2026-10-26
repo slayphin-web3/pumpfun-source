@@ -1,0 +1,471 @@
+{
+  "decoder": "24-byte core::panic::Location records in .data.rel.ro: [&str ptr u64 (R_*_RELATIVE)][len u64][line u32][col u32]",
+  "original_records": 287,
+  "exact_candidate_records_equal": true,
+  "records_corrected_from_candidate11": [
+    {
+      "record_offset": 650696,
+      "path": "program/src/processor/burn/nonfungible.rs",
+      "original_line_col": [
+        11,
+        50
+      ],
+      "candidate11_line_col": [
+        10,
+        50
+      ],
+      "exact_line_col": [
+        11,
+        50
+      ]
+    },
+    {
+      "record_offset": 650720,
+      "path": "program/src/processor/burn/nonfungible.rs",
+      "original_line_col": [
+        34,
+        24
+      ],
+      "candidate11_line_col": [
+        33,
+        24
+      ],
+      "exact_line_col": [
+        34,
+        24
+      ]
+    },
+    {
+      "record_offset": 650744,
+      "path": "program/src/processor/burn/nonfungible.rs",
+      "original_line_col": [
+        101,
+        53
+      ],
+      "candidate11_line_col": [
+        100,
+        53
+      ],
+      "exact_line_col": [
+        101,
+        53
+      ]
+    },
+    {
+      "record_offset": 650768,
+      "path": "program/src/processor/burn/nonfungible.rs",
+      "original_line_col": [
+        128,
+        50
+      ],
+      "candidate11_line_col": [
+        127,
+        50
+      ],
+      "exact_line_col": [
+        128,
+        50
+      ]
+    },
+    {
+      "record_offset": 650792,
+      "path": "program/src/processor/burn/nonfungible.rs",
+      "original_line_col": [
+        128,
+        20
+      ],
+      "candidate11_line_col": [
+        127,
+        20
+      ],
+      "exact_line_col": [
+        128,
+        20
+      ]
+    },
+    {
+      "record_offset": 651176,
+      "path": "program/src/processor/edition/convert_master_edition_v1_to_v2.rs",
+      "original_line_col": [
+        60,
+        30
+      ],
+      "candidate11_line_col": [
+        57,
+        10
+      ],
+      "exact_line_col": [
+        60,
+        30
+      ]
+    },
+    {
+      "record_offset": 651200,
+      "path": "program/src/processor/edition/convert_master_edition_v1_to_v2.rs",
+      "original_line_col": [
+        60,
+        5
+      ],
+      "candidate11_line_col": [
+        57,
+        5
+      ],
+      "exact_line_col": [
+        60,
+        5
+      ]
+    },
+    {
+      "record_offset": 651224,
+      "path": "program/src/processor/edition/convert_master_edition_v1_to_v2.rs",
+      "original_line_col": [
+        61,
+        5
+      ],
+      "candidate11_line_col": [
+        58,
+        5
+      ],
+      "exact_line_col": [
+        61,
+        5
+      ]
+    },
+    {
+      "record_offset": 651248,
+      "path": "program/src/processor/edition/create_master_edition_v3.rs",
+      "original_line_col": [
+        40,
+        59
+      ],
+      "candidate11_line_col": [
+        38,
+        59
+      ],
+      "exact_line_col": [
+        40,
+        59
+      ]
+    },
+    {
+      "record_offset": 651784,
+      "path": "program/src/processor/metadata/transfer.rs",
+      "original_line_col": [
+        215,
+        60
+      ],
+      "candidate11_line_col": [
+        214,
+        60
+      ],
+      "exact_line_col": [
+        215,
+        60
+      ]
+    },
+    {
+      "record_offset": 651808,
+      "path": "program/src/processor/metadata/transfer.rs",
+      "original_line_col": [
+        258,
+        84
+      ],
+      "candidate11_line_col": [
+        257,
+        84
+      ],
+      "exact_line_col": [
+        258,
+        84
+      ]
+    },
+    {
+      "record_offset": 651832,
+      "path": "program/src/processor/metadata/transfer.rs",
+      "original_line_col": [
+        472,
+        82
+      ],
+      "candidate11_line_col": [
+        471,
+        82
+      ],
+      "exact_line_col": [
+        472,
+        82
+      ]
+    },
+    {
+      "record_offset": 651856,
+      "path": "program/src/processor/metadata/transfer.rs",
+      "original_line_col": [
+        342,
+        71
+      ],
+      "candidate11_line_col": [
+        341,
+        71
+      ],
+      "exact_line_col": [
+        342,
+        71
+      ]
+    },
+    {
+      "record_offset": 652016,
+      "path": "program/src/processor/uses/approve_use_authority.rs",
+      "original_line_col": [
+        68,
+        39
+      ],
+      "candidate11_line_col": [
+        66,
+        39
+      ],
+      "exact_line_col": [
+        68,
+        39
+      ]
+    },
+    {
+      "record_offset": 652040,
+      "path": "program/src/processor/uses/approve_use_authority.rs",
+      "original_line_col": [
+        109,
+        14
+      ],
+      "candidate11_line_col": [
+        107,
+        14
+      ],
+      "exact_line_col": [
+        109,
+        14
+      ]
+    },
+    {
+      "record_offset": 652064,
+      "path": "program/src/processor/uses/revoke_use_authority.rs",
+      "original_line_col": [
+        75,
+        39
+      ],
+      "candidate11_line_col": [
+        74,
+        39
+      ],
+      "exact_line_col": [
+        75,
+        39
+      ]
+    },
+    {
+      "record_offset": 652088,
+      "path": "program/src/processor/uses/revoke_use_authority.rs",
+      "original_line_col": [
+        84,
+        14
+      ],
+      "candidate11_line_col": [
+        83,
+        14
+      ],
+      "exact_line_col": [
+        84,
+        14
+      ]
+    },
+    {
+      "record_offset": 652112,
+      "path": "program/src/processor/uses/utilize.rs",
+      "original_line_col": [
+        85,
+        39
+      ],
+      "candidate11_line_col": [
+        81,
+        39
+      ],
+      "exact_line_col": [
+        85,
+        39
+      ]
+    },
+    {
+      "record_offset": 652240,
+      "path": "program/src/processor/mod.rs",
+      "original_line_col": [
+        392,
+        42
+      ],
+      "candidate11_line_col": [
+        391,
+        42
+      ],
+      "exact_line_col": [
+        392,
+        42
+      ]
+    },
+    {
+      "record_offset": 652264,
+      "path": "program/src/processor/mod.rs",
+      "original_line_col": [
+        394,
+        17
+      ],
+      "candidate11_line_col": [
+        393,
+        17
+      ],
+      "exact_line_col": [
+        394,
+        17
+      ]
+    },
+    {
+      "record_offset": 652288,
+      "path": "program/src/processor/mod.rs",
+      "original_line_col": [
+        395,
+        21
+      ],
+      "candidate11_line_col": [
+        394,
+        21
+      ],
+      "exact_line_col": [
+        395,
+        21
+      ]
+    },
+    {
+      "record_offset": 653840,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        177,
+        51
+      ],
+      "candidate11_line_col": [
+        172,
+        51
+      ],
+      "exact_line_col": [
+        177,
+        51
+      ]
+    },
+    {
+      "record_offset": 653864,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        261,
+        5
+      ],
+      "candidate11_line_col": [
+        256,
+        5
+      ],
+      "exact_line_col": [
+        261,
+        5
+      ]
+    },
+    {
+      "record_offset": 653888,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        280,
+        47
+      ],
+      "candidate11_line_col": [
+        275,
+        47
+      ],
+      "exact_line_col": [
+        280,
+        47
+      ]
+    },
+    {
+      "record_offset": 653912,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        280,
+        20
+      ],
+      "candidate11_line_col": [
+        275,
+        20
+      ],
+      "exact_line_col": [
+        280,
+        20
+      ]
+    },
+    {
+      "record_offset": 653936,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        296,
+        5
+      ],
+      "candidate11_line_col": [
+        291,
+        5
+      ],
+      "exact_line_col": [
+        296,
+        5
+      ]
+    },
+    {
+      "record_offset": 653960,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        296,
+        57
+      ],
+      "candidate11_line_col": [
+        291,
+        57
+      ],
+      "exact_line_col": [
+        296,
+        57
+      ]
+    },
+    {
+      "record_offset": 653984,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        298,
+        32
+      ],
+      "candidate11_line_col": [
+        293,
+        32
+      ],
+      "exact_line_col": [
+        298,
+        32
+      ]
+    },
+    {
+      "record_offset": 654008,
+      "path": "program/src/utils/metadata.rs",
+      "original_line_col": [
+        298,
+        5
+      ],
+      "candidate11_line_col": [
+        293,
+        5
+      ],
+      "exact_line_col": [
+        298,
+        5
+      ]
+    }
+  ]
+}

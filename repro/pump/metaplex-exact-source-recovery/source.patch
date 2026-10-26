@@ -1,0 +1,474 @@
+diff --git a/programs/token-metadata/program/src/assertions/uses.rs b/programs/token-metadata/program/src/assertions/uses.rs
+index 112dabc..5da8c06 100644
+--- a/programs/token-metadata/program/src/assertions/uses.rs
++++ b/programs/token-metadata/program/src/assertions/uses.rs
+@@ -18,6 +18,9 @@ pub fn assert_valid_use(
+         if i.use_method == UseMethod::Multiple && (i.total < 2 || i.total < i.remaining) {
+             return Err(MetadataError::InvalidUseMethod.into());
+         }
++        if i.use_method == UseMethod::Burn && i.remaining > i.total {
++            return Err(MetadataError::InvalidUseMethod.into());
++        }
+     }
+     match (incoming_use, current_use) {
+         (Some(incoming), Some(current)) => {
+diff --git a/programs/token-metadata/program/src/error.rs b/programs/token-metadata/program/src/error.rs
+index 4533e2c..a39a5a8 100644
+--- a/programs/token-metadata/program/src/error.rs
++++ b/programs/token-metadata/program/src/error.rs
+@@ -799,6 +799,10 @@ pub enum MetadataError {
+     /// 202
+     #[error("Conditions for closing not met")]
+     ConditionsForClosingNotMet,
++
++    /// 203
++    #[error("Master edition is not mutable")]
++    MasterEditionNotMutable,
+ }
+ 
+ impl PrintProgramError for MetadataError {
+diff --git a/programs/token-metadata/program/src/processor/burn/nonfungible.rs b/programs/token-metadata/program/src/processor/burn/nonfungible.rs
+index a4e77f5..535cc04 100644
+--- a/programs/token-metadata/program/src/processor/burn/nonfungible.rs
++++ b/programs/token-metadata/program/src/processor/burn/nonfungible.rs
+@@ -1,3 +1,5 @@
++use crate::assertions::assert_derivation_with_bump;
++
+ use super::*;
+ 
+ pub(crate) struct BurnNonFungibleArgs {
+@@ -50,7 +52,14 @@ pub(crate) fn burn_nonfungible(ctx: &Context<Burn>, args: BurnNonFungibleArgs) -
+     ]);
+ 
+     let bump = match args.metadata.edition_nonce {
+-        Some(bump) => Ok(bump),
++        Some(bump) => {
++            assert_derivation_with_bump(
++                &crate::ID,
++                edition_info,
++                &[edition_info_path, vec![&[bump]]].concat(),
++            )?;
++            Ok(bump)
++        }
+         None => assert_derivation(&crate::ID, edition_info, &edition_info_path),
+     }?;
+ 
+diff --git a/programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs b/programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs
+index c07144d..0085d9e 100644
+--- a/programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs
++++ b/programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs
+@@ -38,6 +38,9 @@ pub fn process_approve_collection_authority(
+     if metadata.mint != *mint_info.key {
+         return Err(MetadataError::MintMismatch.into());
+     }
++    if system_account_info.key != &solana_program::system_program::ID {
++        return Err(MetadataError::InvalidSystemProgram.into());
++    }
+     let collection_authority_info_empty = collection_authority_record.try_data_is_empty()?;
+     if !collection_authority_info_empty {
+         return Err(MetadataError::CollectionAuthorityRecordAlreadyExists.into());
+diff --git a/programs/token-metadata/program/src/processor/delegate/delegate.rs b/programs/token-metadata/program/src/processor/delegate/delegate.rs
+index 0f9989a..c7725dc 100644
+--- a/programs/token-metadata/program/src/processor/delegate/delegate.rs
++++ b/programs/token-metadata/program/src/processor/delegate/delegate.rs
+@@ -233,6 +233,13 @@ fn create_other_delegate_v1(
+                 token_info,
+                 1,
+             )?;
++
++            if !matches!(
++                metadata.token_standard,
++                None | Some(TokenStandard::NonFungible | TokenStandard::ProgrammableNonFungible)
++            ) {
++                return Err(MetadataError::InvalidTokenStandard.into());
++            }
+         }
+         _ => return Err(MetadataError::InvalidDelegateRole.into()),
+     }
+@@ -296,8 +303,8 @@ fn create_persistent_delegate_v1(
+     // ownership
+ 
+     assert_owned_by(ctx.accounts.metadata_info, program_id)?;
+-    assert_owner_in(ctx.accounts.mint_info, &SPL_TOKEN_PROGRAM_IDS)?;
+-    assert_owner_in(token_info, &SPL_TOKEN_PROGRAM_IDS)?;
++    assert_owned_by(ctx.accounts.mint_info, spl_token_program_info.key)?;
++    assert_owned_by(token_info, spl_token_program_info.key)?;
+ 
+     // key match
+ 
+diff --git a/programs/token-metadata/program/src/processor/delegate/revoke.rs b/programs/token-metadata/program/src/processor/delegate/revoke.rs
+index 454c1ba..ab4d83e 100644
+--- a/programs/token-metadata/program/src/processor/delegate/revoke.rs
++++ b/programs/token-metadata/program/src/processor/delegate/revoke.rs
+@@ -169,7 +169,9 @@ fn revoke_other_delegate_v1(
+                 // authority must be the owner of the token account: spl-token required the
+                 // token owner to set a delegate
+                 let token = unpack::<Account>(&token_info.try_borrow_data()?)?;
+-                if token.owner != *ctx.accounts.authority_info.key {
++                if token.owner != *ctx.accounts.authority_info.key
++                    || token.mint != *ctx.accounts.mint_info.key
++                {
+                     return Err(MetadataError::IncorrectOwner.into());
+                 }
+                 *ctx.accounts.authority_info.key
+diff --git a/programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs b/programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs
+index f74ba15..8fd3536 100644
+--- a/programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs
++++ b/programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs
+@@ -5,7 +5,10 @@ use crate::{
+     assertions::{assert_initialized, assert_owned_by},
+     error::MetadataError,
+     processor::all_account_infos,
+-    state::{Key, MasterEditionV1, MasterEditionV2, TokenMetadataAccount},
++    state::{
++        Key, MasterEditionV1, MasterEditionV2, TokenMetadataAccount,
++        MASTER_EDITION_FEE_FLAG_OFFSET, MASTER_EDITION_TOKEN_STANDARD_OFFSET,
++    },
+     utils::SPL_TOKEN_ID,
+ };
+ 
+@@ -43,6 +46,7 @@ pub fn process_convert_master_edition_v1_to_v2(
+         return Err(MetadataError::OneTimeAuthMintSupplyMustBeZeroForConversion.into());
+     }
+ 
++    let data_len = master_edition_info.data_len();
+     borsh::to_writer(
+         &mut master_edition_info.try_borrow_mut_data()?[..],
+         &MasterEditionV2 {
+@@ -52,5 +56,9 @@ pub fn process_convert_master_edition_v1_to_v2(
+         },
+     )?;
+ 
++    let mut master_edition_info_data = master_edition_info.try_borrow_mut_data()?;
++    master_edition_info_data[data_len - MASTER_EDITION_FEE_FLAG_OFFSET] = 0;
++    master_edition_info_data[data_len - MASTER_EDITION_TOKEN_STANDARD_OFFSET] = 0;
++
+     Ok(())
+ }
+diff --git a/programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs b/programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs
+index 40c05af..452b3d6 100644
+--- a/programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs
++++ b/programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs
+@@ -1,5 +1,7 @@
+ use mpl_utils::create_or_allocate_account_raw;
+-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
++use solana_program::{
++    account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey, system_program,
++};
+ use spl_token_2022::state::Mint;
+ 
+ use crate::{
+@@ -61,6 +63,10 @@ pub fn process_create_master_edition(
+         return Err(MetadataError::EditionMintDecimalsShouldBeZero.into());
+     }
+ 
++    if system_account_info.key != &system_program::ID {
++        return Err(MetadataError::InvalidSystemProgram.into());
++    }
++
+     assert_update_authority_is_correct(&metadata, update_authority_info)?;
+ 
+     if mint.supply != 1 {
+@@ -100,6 +106,8 @@ pub fn process_create_master_edition(
+             &mut metadata_account_info.try_borrow_mut_data()?[..],
+             &metadata_mut,
+         )?;
++    } else {
++        return Err(MetadataError::MasterEditionNotMutable.into());
+     }
+ 
+     // While you can't mint any more of your master record, you can
+diff --git a/programs/token-metadata/program/src/processor/metadata/mint.rs b/programs/token-metadata/program/src/processor/metadata/mint.rs
+index 4e0c635..ae8de67 100644
+--- a/programs/token-metadata/program/src/processor/metadata/mint.rs
++++ b/programs/token-metadata/program/src/processor/metadata/mint.rs
+@@ -151,7 +151,6 @@ pub fn mint_v1(program_id: &Pubkey, ctx: Context<Mint>, args: MintArgs) -> Progr
+         if matches!(
+             metadata.token_standard,
+             Some(TokenStandard::ProgrammableNonFungible)
+-                | Some(TokenStandard::ProgrammableNonFungibleEdition)
+         ) {
+             if let COption::Some(close_authority) = token.close_authority {
+                 // the close authority must match the master edition if there is one set
+diff --git a/programs/token-metadata/program/src/processor/metadata/print.rs b/programs/token-metadata/program/src/processor/metadata/print.rs
+index efb4407..7a7512e 100644
+--- a/programs/token-metadata/program/src/processor/metadata/print.rs
++++ b/programs/token-metadata/program/src/processor/metadata/print.rs
+@@ -213,7 +213,6 @@ fn print_logic<'a>(
+         if matches!(
+             master_metadata.token_standard,
+             Some(TokenStandard::ProgrammableNonFungible)
+-                | Some(TokenStandard::ProgrammableNonFungibleEdition)
+         ) {
+             if let COption::Some(close_authority) = token.close_authority {
+                 // the close authority must match the edition if there is one set
+diff --git a/programs/token-metadata/program/src/processor/metadata/set_token_standard.rs b/programs/token-metadata/program/src/processor/metadata/set_token_standard.rs
+index 2107797..a0c94ce 100644
+--- a/programs/token-metadata/program/src/processor/metadata/set_token_standard.rs
++++ b/programs/token-metadata/program/src/processor/metadata/set_token_standard.rs
+@@ -20,6 +20,10 @@ pub fn process_set_token_standard(program_id: &Pubkey, accounts: &[AccountInfo])
+     let update_authority_account_info = next_account_info(account_info_iter)?;
+     let mint_account_info = next_account_info(account_info_iter)?;
+ 
++    crate::assertions::assert_owner_in(
++        mint_account_info,
++        &mpl_utils::token::SPL_TOKEN_PROGRAM_IDS,
++    )?;
+     // Owned by token-metadata program.
+     assert_owned_by(metadata_account_info, program_id)?;
+     let mut metadata = Metadata::from_account_info(metadata_account_info)?;
+diff --git a/programs/token-metadata/program/src/processor/metadata/transfer.rs b/programs/token-metadata/program/src/processor/metadata/transfer.rs
+index d4700fe..b4ae031 100644
+--- a/programs/token-metadata/program/src/processor/metadata/transfer.rs
++++ b/programs/token-metadata/program/src/processor/metadata/transfer.rs
+@@ -119,6 +119,11 @@ fn transfer_v1(program_id: &Pubkey, ctx: Context<Transfer>, args: TransferArgs)
+         assert_owned_by(authorization_rules, &mpl_token_auth_rules::ID)?;
+     }
+ 
++    // Transferring to the same token account is a no-op.
++    if ctx.accounts.destination_info.key == ctx.accounts.token_info.key {
++        return Ok(());
++    }
++
+     // Deserialize metadata.
+     let metadata = Metadata::from_account_info(ctx.accounts.metadata_info)?;
+ 
+diff --git a/programs/token-metadata/program/src/processor/metadata/update.rs b/programs/token-metadata/program/src/processor/metadata/update.rs
+index 91782f6..349bbb9 100644
+--- a/programs/token-metadata/program/src/processor/metadata/update.rs
++++ b/programs/token-metadata/program/src/processor/metadata/update.rs
+@@ -335,10 +335,6 @@ fn check_desired_token_standard(
+     desired_token_standard: TokenStandard,
+ ) -> ProgramResult {
+     match (existing_or_inferred_token_std, desired_token_standard) {
+-        (
+-            TokenStandard::Fungible | TokenStandard::FungibleAsset,
+-            TokenStandard::Fungible | TokenStandard::FungibleAsset,
+-        ) => Ok(()),
+         (existing, desired) if existing == desired => Ok(()),
+         _ => Err(MetadataError::InvalidTokenStandard.into()),
+     }
+diff --git a/programs/token-metadata/program/src/processor/mod.rs b/programs/token-metadata/program/src/processor/mod.rs
+index c1fc752..a308d59 100644
+--- a/programs/token-metadata/program/src/processor/mod.rs
++++ b/programs/token-metadata/program/src/processor/mod.rs
+@@ -369,6 +369,7 @@ fn incompatible_accounts(
+                 if matches!(
+                     metadata.token_standard,
+                     Some(TokenStandard::ProgrammableNonFungible)
++                        | Some(TokenStandard::ProgrammableNonFungibleEdition)
+                 ) {
+                     return Ok(true);
+                 }
+diff --git a/programs/token-metadata/program/src/processor/uses/approve_use_authority.rs b/programs/token-metadata/program/src/processor/uses/approve_use_authority.rs
+index c7302f3..56f4a3c 100644
+--- a/programs/token-metadata/program/src/processor/uses/approve_use_authority.rs
++++ b/programs/token-metadata/program/src/processor/uses/approve_use_authority.rs
+@@ -1,6 +1,7 @@
+ use mpl_utils::{assert_signer, create_or_allocate_account_raw};
+ use solana_program::{
+     account_info::AccountInfo, entrypoint::ProgramResult, program::invoke, pubkey::Pubkey,
++    system_program,
+ };
+ use spl_token_2022::instruction::approve;
+ 
+@@ -12,8 +13,8 @@ use crate::{
+     error::MetadataError,
+     processor::all_account_infos,
+     state::{
+-        Key, Metadata, TokenMetadataAccount, UseAuthorityRecord, UseMethod, PREFIX, USER,
+-        USE_AUTHORITY_RECORD_SIZE,
++        Key, Metadata, TokenMetadataAccount, TokenStandard, UseAuthorityRecord, UseMethod, PREFIX,
++        USER, USE_AUTHORITY_RECORD_SIZE,
+     },
+     utils::SPL_TOKEN_ID,
+ };
+@@ -42,6 +43,15 @@ pub fn process_approve_use_authority(
+     if metadata.uses.is_none() {
+         return Err(MetadataError::Unusable.into());
+     }
++    if !matches!(
++        metadata.token_standard,
++        Some(TokenStandard::NonFungible)
++            | Some(TokenStandard::NonFungibleEdition)
++            | Some(TokenStandard::ProgrammableNonFungible)
++            | Some(TokenStandard::ProgrammableNonFungibleEdition)
++    ) {
++        return Err(MetadataError::InvalidTokenStandard.into());
++    }
+     if *token_program_account_info.key != SPL_TOKEN_ID {
+         return Err(MetadataError::InvalidTokenProgram.into());
+     }
+@@ -71,6 +81,9 @@ pub fn process_approve_use_authority(
+         &[bump_seed],
+     ];
+     process_use_authority_validation(use_authority_record_info.data_len(), true)?;
++    if system_account_info.key != &system_program::ID {
++        return Err(MetadataError::InvalidSystemProgram.into());
++    }
+     create_or_allocate_account_raw(
+         *program_id,
+         use_authority_record_info,
+@@ -79,7 +92,7 @@ pub fn process_approve_use_authority(
+         USE_AUTHORITY_RECORD_SIZE,
+         use_authority_seeds,
+     )?;
+-    if number_of_uses > metadata_uses.remaining {
++    if number_of_uses == 0 || number_of_uses > metadata_uses.remaining {
+         return Err(MetadataError::NotEnoughUses.into());
+     }
+     if metadata_uses.use_method == UseMethod::Burn {
+diff --git a/programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs b/programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs
+index bc88c38..d18daa8 100644
+--- a/programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs
++++ b/programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs
+@@ -14,7 +14,7 @@ use crate::{
+     },
+     error::MetadataError,
+     processor::all_account_infos,
+-    state::{Key, Metadata, TokenMetadataAccount, UseAuthorityRecord, UseMethod},
++    state::{Key, Metadata, TokenMetadataAccount, TokenStandard, UseAuthorityRecord, UseMethod},
+     utils::{close_program_account, SPL_TOKEN_ID},
+ };
+ 
+@@ -37,6 +37,15 @@ pub fn process_revoke_use_authority(
+     if metadata.uses.is_none() {
+         return Err(MetadataError::Unusable.into());
+     }
++    if !matches!(
++        metadata.token_standard,
++        Some(TokenStandard::NonFungible)
++            | Some(TokenStandard::NonFungibleEdition)
++            | Some(TokenStandard::ProgrammableNonFungible)
++            | Some(TokenStandard::ProgrammableNonFungibleEdition)
++    ) {
++        return Err(MetadataError::InvalidTokenStandard.into());
++    }
+     if *token_program_account_info.key != SPL_TOKEN_ID {
+         return Err(MetadataError::InvalidTokenProgram.into());
+     }
+diff --git a/programs/token-metadata/program/src/processor/uses/utilize.rs b/programs/token-metadata/program/src/processor/uses/utilize.rs
+index d680e2a..48c3dca 100644
+--- a/programs/token-metadata/program/src/processor/uses/utilize.rs
++++ b/programs/token-metadata/program/src/processor/uses/utilize.rs
+@@ -20,7 +20,10 @@ use crate::{
+         },
+     },
+     error::MetadataError,
+-    state::{Metadata, TokenMetadataAccount, UseAuthorityRecord, UseMethod, Uses, BURN, PREFIX},
++    state::{
++        Metadata, TokenMetadataAccount, TokenStandard, UseAuthorityRecord, UseMethod, Uses, BURN,
++        PREFIX,
++    },
+     utils::SPL_TOKEN_ID,
+ };
+ 
+@@ -57,6 +60,15 @@ pub fn process_utilize(
+     if metadata.uses.is_none() {
+         return Err(MetadataError::Unusable.into());
+     }
++    if !matches!(
++        metadata.token_standard,
++        Some(TokenStandard::NonFungible)
++            | Some(TokenStandard::NonFungibleEdition)
++            | Some(TokenStandard::ProgrammableNonFungible)
++            | Some(TokenStandard::ProgrammableNonFungibleEdition)
++    ) {
++        return Err(MetadataError::InvalidTokenStandard.into());
++    }
+     if *token_program_account_info.key != SPL_TOKEN_ID {
+         return Err(MetadataError::InvalidTokenProgram.into());
+     }
+@@ -72,6 +84,9 @@ pub fn process_utilize(
+     let mut metadata = Metadata::from_account_info(metadata_info)?;
+     let metadata_uses = metadata.uses.unwrap();
+     let must_burn = metadata_uses.use_method == UseMethod::Burn;
++    if number_of_uses == 0 {
++        return Err(MetadataError::NotEnoughUses.into());
++    }
+     if number_of_uses > metadata_uses.total || number_of_uses > metadata_uses.remaining {
+         return Err(MetadataError::NotEnoughUses.into());
+     }
+diff --git a/programs/token-metadata/program/src/utils/metadata.rs b/programs/token-metadata/program/src/utils/metadata.rs
+index 6bf33d4..86a11f3 100644
+--- a/programs/token-metadata/program/src/utils/metadata.rs
++++ b/programs/token-metadata/program/src/utils/metadata.rs
+@@ -4,7 +4,7 @@ use mpl_utils::{
+     token::{get_mint_authority, SPL_TOKEN_PROGRAM_IDS},
+ };
+ use solana_program::{
+-    account_info::AccountInfo, entrypoint::ProgramResult, program_option::COption, pubkey::Pubkey,
++    account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey, system_program,
+ };
+ 
+ use super::{compression::is_decompression, *};
+@@ -20,19 +20,6 @@ use crate::{
+     },
+ };
+ 
+-// This equals the program address of the metadata program:
+-//
+-// AqH29mZfQFgRpfwaPoTMWSKJ5kqauoc1FwVBRksZyQrt
+-//
+-// IMPORTANT NOTE
+-// This allows the upgrade authority of the Token Metadata program to create metadata for SPL tokens.
+-// This only allows the upgrade authority to do create general metadata for the SPL token, it does not
+-// allow the upgrade authority to add or change creators.
+-pub const SEED_AUTHORITY: Pubkey = Pubkey::new_from_array([
+-    0x92, 0x17, 0x2c, 0xc4, 0x72, 0x5d, 0xc0, 0x41, 0xf9, 0xdd, 0x8c, 0x51, 0x52, 0x60, 0x04, 0x26,
+-    0x00, 0x93, 0xa3, 0x0b, 0x02, 0x73, 0xdc, 0xfa, 0x74, 0x92, 0x17, 0xfc, 0x94, 0xa2, 0x40, 0x49,
+-]);
+-
+ // This allows the Bubblegum program to add verified creators since they were verified as part of
+ // the Bubblegum program.
+ 
+@@ -53,7 +40,7 @@ pub fn process_create_metadata_accounts_logic(
+     accounts: CreateMetadataAccountsLogicArgs,
+     data: DataV2,
+     allow_direct_creator_writes: bool,
+-    mut is_mutable: bool,
++    is_mutable: bool,
+     is_edition: bool,
+     add_token_standard: bool,
+     collection_details: Option<CollectionDetails>,
+@@ -69,27 +56,13 @@ pub fn process_create_metadata_accounts_logic(
+         system_account_info,
+     } = accounts;
+ 
+-    let mut update_authority_key = *update_authority_info.key;
++    let update_authority_key = *update_authority_info.key;
+     let existing_mint_authority = get_mint_authority(mint_info)?;
+ 
+     // IMPORTANT NOTE:
+     // This allows the Metaplex Foundation to Create but not update metadata for SPL tokens that
+     // have not populated their metadata.
+-    assert_mint_authority_matches_mint(&existing_mint_authority, mint_authority_info).or_else(
+-        |e| {
+-            // Allow seeding by the authority seed populator
+-            if mint_authority_info.key == &SEED_AUTHORITY && mint_authority_info.is_signer {
+-                // When metadata is seeded, the mint authority should be able to change it
+-                if let COption::Some(auth) = existing_mint_authority {
+-                    update_authority_key = auth;
+-                    is_mutable = true;
+-                }
+-                Ok(())
+-            } else {
+-                Err(e)
+-            }
+-        },
+-    )?;
++    assert_mint_authority_matches_mint(&existing_mint_authority, mint_authority_info)?;
+     assert_owner_in(mint_info, &SPL_TOKEN_PROGRAM_IDS)?;
+ 
+     let metadata_seeds = &[
+@@ -110,6 +83,10 @@ pub fn process_create_metadata_accounts_logic(
+         return Err(MetadataError::InvalidMetadataKey.into());
+     }
+ 
++    if system_account_info.key != &system_program::ID {
++        return Err(MetadataError::InvalidSystemProgram.into());
++    }
++
+     create_or_allocate_account_raw(
+         *program_id,
+         metadata_account_info,
