@@ -1,0 +1,43 @@
+{
+  "upstream_commit": "17e99434af5ead3e989c08f32af33609821d0bc0",
+  "baseline": {
+    "programs/token-metadata/program/src/assertions/uses.rs": "bf7661b1d50f3230c625463f617cb6e4b622d82b9770de0b1043a4ea9fde1604",
+    "programs/token-metadata/program/src/error.rs": "3d589a0caa280787d909b5dd0d8f3ae04ac03ad1a68bf5f84f068588edc93a96",
+    "programs/token-metadata/program/src/processor/burn/nonfungible.rs": "314a4a8e7f292437abbd1997c86449330af6623d605b68ee0a7dea92eb1ffdbf",
+    "programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs": "ccbed9daef13dee74d0fee684d71313ceae67104cff488ae15c364ae97cdfc7f",
+    "programs/token-metadata/program/src/processor/delegate/delegate.rs": "e6cc854aa6b131224967a85f47115ca55eda33183f24acd4ffc93de7968bb3ec",
+    "programs/token-metadata/program/src/processor/delegate/revoke.rs": "6fec54c04e3afa64ebde682eba565caed67fdf77fbe3787b964134b9ac0f9f17",
+    "programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs": "ddbbad1c3da56010e0e5d73d7dc0f8cf011cc5e8bc66bb52ed27a6f53aa78e94",
+    "programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs": "6db6cae6460be30afc45def14dfbf8b16c54abef3797b1b6f178b5edc6d6dde7",
+    "programs/token-metadata/program/src/processor/metadata/mint.rs": "3f11caf493a1d521f01d43625d8292979e86d3eaafafe2aaae6217f58ea971d0",
+    "programs/token-metadata/program/src/processor/metadata/print.rs": "286554b3e09b2a29a93d49ff54db717da6f81e0d71780ec20758fe76ce3c11c7",
+    "programs/token-metadata/program/src/processor/metadata/set_token_standard.rs": "f8e3eed85d515853705547c5ed58a2d4b3ac795c4bd71ae930de38d51f1a6904",
+    "programs/token-metadata/program/src/processor/metadata/transfer.rs": "cb10305f0a65de9fe39e0068f15b1e207c70c9364692bfa2a347db04fa5c32e9",
+    "programs/token-metadata/program/src/processor/metadata/update.rs": "0c36490a7b26405ae64740132790a1e121e619770d08194d3dd699294495c58c",
+    "programs/token-metadata/program/src/processor/mod.rs": "b4d3335973488e0c536494e57bbdb767a20feb46fc505f75fe3ed1e70b066f2a",
+    "programs/token-metadata/program/src/processor/uses/approve_use_authority.rs": "6c6e9be15d3b83531fad8b274cee055af3e97c0637069b209f7c3f9e24455b8a",
+    "programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs": "4de60443105c05918efc2d89d002c51d2b6b8d0a96a4bc35fd837e52c8f6f7e6",
+    "programs/token-metadata/program/src/processor/uses/utilize.rs": "f495c3380666f410648a4258074a7463dfd22f429d15a61415957622937eaf15",
+    "programs/token-metadata/program/src/utils/metadata.rs": "7944008ced02179cf5ecfd2a0674b9d660b94e39f1dd196e348ebc518b2b17d6"
+  },
+  "patched": {
+    "programs/token-metadata/program/src/assertions/uses.rs": "4d9070729b9b969fbca4a4c118db676445ddc60ca431b2488f96e73b3b287c21",
+    "programs/token-metadata/program/src/error.rs": "65a6eb659139cf7c0385856670b8027a54a08202eead12c375952fffa75b4c5b",
+    "programs/token-metadata/program/src/processor/burn/nonfungible.rs": "74ddff9002970e89034a8675d9be0782fdf999ab3e1e4f3b9e30adf58c7b2e76",
+    "programs/token-metadata/program/src/processor/collection/approve_collection_authority.rs": "6dcc46e26664192f7a1c952c62a0efe0d1ac0bcd606135bc87e675c029fcb113",
+    "programs/token-metadata/program/src/processor/delegate/delegate.rs": "18ab7084fe13a0698f5d5f88d0d1a39376c6e3de2bfd5df81542f53f9bab4f6c",
+    "programs/token-metadata/program/src/processor/delegate/revoke.rs": "8a38bcbaf9e5ad3c95553af9ac9ddc6eaa0ff4cfe56de28bf84e4de449fe6122",
+    "programs/token-metadata/program/src/processor/edition/convert_master_edition_v1_to_v2.rs": "3b23a47ca659cf7ba548159987a3c5c20c646c1a32de64c49660162b36d33801",
+    "programs/token-metadata/program/src/processor/edition/create_master_edition_v3.rs": "551fce521bb7b3e80dc2348f02b1d3cbadccafea276e9c727801732c46dcbb79",
+    "programs/token-metadata/program/src/processor/metadata/mint.rs": "5b3af585867f750015695e6fa5663befc2b26b062d2efdd6892eb70bd79b0c3e",
+    "programs/token-metadata/program/src/processor/metadata/print.rs": "8855c7eefa059307b80482e4f1a6dde0f86d478d8019bf2f224d2793128fa922",
+    "programs/token-metadata/program/src/processor/metadata/set_token_standard.rs": "1e9784e9e6c08cf053ccc95a633d2e032d0d24790d63c18bac2b2b6780a52b65",
+    "programs/token-metadata/program/src/processor/metadata/transfer.rs": "ad7fcf9e19717426c182c3f6143fdbf883dd50e5fb439648f58f4e89fb9273b6",
+    "programs/token-metadata/program/src/processor/metadata/update.rs": "35b7e378d513e9fdab46baeb41a1b4fbaf3c24a1b5aa09db6945a682e9abba9e",
+    "programs/token-metadata/program/src/processor/mod.rs": "402c071b99f44e76925b9a4f20ee1fc96cdad073a8d914256cd155237d86d8a0",
+    "programs/token-metadata/program/src/processor/uses/approve_use_authority.rs": "8ce392c3937d84143c04f49efebb371a393df95de9d0368d0e281a639f541e90",
+    "programs/token-metadata/program/src/processor/uses/revoke_use_authority.rs": "dc084b5208956f86067f43462078bd6fcb19fd7b1d1a152a91d50c9c449ebc41",
+    "programs/token-metadata/program/src/processor/uses/utilize.rs": "dbdb7a2dc48d4b7387ee46a3af56e8e17864521d0ee0d59138d5e2d613b7be08",
+    "programs/token-metadata/program/src/utils/metadata.rs": "0cdb10dec75816cabb4563aa397e48d42f2a6836e1eb438dbd3b081eeb3a43c1"
+  }
+}

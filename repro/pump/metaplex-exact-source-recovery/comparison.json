@@ -1,0 +1,36 @@
+{
+  "dependency": "token_metadata",
+  "program_id": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+  "upstream_repository": "https://github.com/metaplex-foundation/mpl-token-metadata",
+  "upstream_commit": "17e99434af5ead3e989c08f32af33609821d0bc0",
+  "source_patch_sha256": "db04ff05d81d17d4b7c077da9734ac81af9a4de6fa17739a5b99707774fd1111",
+  "compiler": {
+    "platform_tools": "v1.37",
+    "rustc_version": "rustc 1.68.0-dev / LLVM 15.0.7",
+    "rustc_sha256": "7194df9c12e893cfa88fff5dd821d02d45910b4d375e13677b4723f45769a384",
+    "platform_tools_archive_sha256": "8d5153589dbe19635affe937663cf4555a7e69a62d91ab4a1df064aaa8d5f066",
+    "driver_equivalence": "native recipe reproduces hosted candidate11 (3bbaf27f...) and candidate12/13 (4f039033...) raw outputs byte-for-byte"
+  },
+  "captured_original_path": "evidence/dependencies/token_metadata/deployed.so",
+  "captured_original_bytes": 793991,
+  "captured_original_sha256": "31f0a627dba051a938de650464e55cc5397a4be0fd496929c1f9cf02fe5e9011",
+  "raw_compiler_output_bytes": 707448,
+  "raw_compiler_output_sha256": "99ee61a5159e15a359b01298b52c9f9f912eb19e47bdfe83987c16de52a4b1ff",
+  "raw_output_equals_captured_elf_extent": true,
+  "captured_allocation_tail_bytes": 86543,
+  "captured_allocation_tail_all_zero": true,
+  "regenerated_zero_padding_bytes": 86543,
+  "padded_candidate_sha256": "31f0a627dba051a938de650464e55cc5397a4be0fd496929c1f9cf02fe5e9011",
+  "full_byte_equality": true,
+  "differing_positions": 0,
+  "previous_best": {
+    "candidate": "repro/pump/metaplex-candidate-build-11",
+    "differing_positions": 1509,
+    "by_section": {
+      ".text": 1477,
+      ".data.rel.ro": 30,
+      ".rel.dyn": 2
+    }
+  },
+  "clean_room_rebuild": "fresh upstream checkout + git apply source.patch + fresh CARGO_HOME and target directory; raw sha256 identical"
+}

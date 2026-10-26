@@ -1,0 +1,49 @@
+{
+  "package": "metaplex-exact-source-recovery",
+  "files": {
+    "README.md": {
+      "bytes": 7355,
+      "sha256": "f704fe564a3242f1628574c11e226ecde1f52568a2ac2bf805aa1f80e5e1262b"
+    },
+    "build.log.gz": {
+      "bytes": 3770,
+      "sha256": "a6a5c5028616033fc3c518c3d3c956ddd6826758d9b319b0a8865e11409d580b"
+    },
+    "build_native.sh": {
+      "bytes": 2089,
+      "sha256": "cf645fd35f683c71239f98d8c76e9e5142a3185be22ae37497a0115d204fb95b"
+    },
+    "comparison.json": {
+      "bytes": 1827,
+      "sha256": "30c0c49e25f5f7d898dc11b63d03f798d42f348ed97a0688067395e931293d7f"
+    },
+    "delta-from-candidate11.patch": {
+      "bytes": 12791,
+      "sha256": "bdb71dfe4cffe99e05e5cf477ab808836945e8ade1a8a01dcb932a93cbd2e130"
+    },
+    "location-records.json": {
+      "bytes": 8541,
+      "sha256": "c1d0dd63d50455de641ccbc689cb91d343ce27277dec4fc61d897b8b77321339"
+    },
+    "source-inputs.json": {
+      "bytes": 5235,
+      "sha256": "5b8b259dc265e0f7b4bdaa0a1b04bab58f724bcc04555a88dda616d01870d429"
+    },
+    "source.patch": {
+      "bytes": 21925,
+      "sha256": "db04ff05d81d17d4b7c077da9734ac81af9a4de6fa17739a5b99707774fd1111"
+    },
+    "token_metadata.so": {
+      "bytes": 707448,
+      "sha256": "99ee61a5159e15a359b01298b52c9f9f912eb19e47bdfe83987c16de52a4b1ff"
+    },
+    "utilize-variants.json": {
+      "bytes": 4679,
+      "sha256": "22ea1d15172207a13311cd163132363c65e07d001ae851b7823c835b55b0c5fe"
+    },
+    "verify.py": {
+      "bytes": 5140,
+      "sha256": "5c85834bdd8c66cbdb4ae79e1c470a06997c0f0da505795d51c9026b69305cf6"
+    }
+  }
+}
